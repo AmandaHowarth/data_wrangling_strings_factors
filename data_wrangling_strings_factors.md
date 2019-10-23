@@ -319,3 +319,106 @@ weather_df =
     ## file last updated:  2019-10-22 21:17:11
 
     ## file min/max dates: 1999-09-01 / 2019-10-31
+
+``` r
+weather_df %>%
+  mutate(name = fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+![](data_wrangling_strings_factors_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+#above re-leveled factor bc took numeric leveling that exists in background and putting it into a new order.. otherwise would use alphabetical order 
+# can also jstu do mutate(name=fct_relevel(name, c("Waikiki_HA))) to make that the reference level and everything else will follow in alphabetical order 
+```
+
+``` r
+weather_df %>%
+  mutate(name = fct_reorder(name, tmax)) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+![](data_wrangling_strings_factors_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+# tmax says look at the factors that i ahve and look at the smallest tmax, then the next largest, etc. now in order according to T max 
+```
+
+``` r
+weather_df %>%
+  lm(tmax ~ name, data = .)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ name, data = .)
+    ## 
+    ## Coefficients:
+    ##      (Intercept)    nameWaikiki_HA  nameWaterhole_WA  
+    ##           17.366            12.291            -9.884
+
+``` r
+weather_df %>%
+  mutate(name = forcats::fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
+  lm(tmax ~ name, data = .)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ name, data = .)
+    ## 
+    ## Coefficients:
+    ##        (Intercept)  nameCentralPark_NY    nameWaterhole_WA  
+    ##              29.66              -12.29              -22.18
+
+``` r
+data("nyc_airbnb")
+
+nyc_airbnb %>%
+  filter(neighbourhood_group == "Manhattan") %>% 
+  mutate(
+    neighbourhood = fct_reorder(neighbourhood, price, na.rm = TRUE)) %>% 
+  ggplot(aes(x = neighbourhood, y = price)) +
+  geom_boxplot() +
+  coord_flip() + 
+  ylim(0, 1000)
+```
+
+    ## Warning: Removed 109 rows containing non-finite values (stat_boxplot).
+
+![](data_wrangling_strings_factors_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+# want neighborhoods in increasing price order 
+# "na.rm = TRUE" means remove missing values
+#fct_reorder puts it in an order 
+```
+
+``` r
+data("rest_inspec")
+
+rest_inspec %>% 
+  group_by(boro, grade) %>% 
+  summarize(n = n()) %>% 
+  spread(key = grade, value = n)
+```
+
+    ## # A tibble: 6 x 8
+    ## # Groups:   boro [6]
+    ##   boro              A     B     C `Not Yet Graded`     P     Z `<NA>`
+    ##   <chr>         <int> <int> <int>            <int> <int> <int>  <int>
+    ## 1 BRONX         13688  2801   701              200   163   351  16833
+    ## 2 BROOKLYN      37449  6651  1684              702   416   977  51930
+    ## 3 MANHATTAN     61608 10532  2689              765   508  1237  80615
+    ## 4 Missing           4    NA    NA               NA    NA    NA     13
+    ## 5 QUEENS        35952  6492  1593              604   331   913  45816
+    ## 6 STATEN ISLAND  5215   933   207               85    47   149   6730

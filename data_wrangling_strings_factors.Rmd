@@ -195,3 +195,63 @@ weather_df =
     tmax = tmax / 10) %>%
   select(name, id, everything())
 
+
+weather_df %>%
+  mutate(name = fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+
+#above re-leveled factor bc took numeric leveling that exists in background and putting it into a new order.. otherwise would use alphabetical order 
+# can also jstu do mutate(name=fct_relevel(name, c("Waikiki_HA))) to make that the reference level and everything else will follow in alphabetical order 
+```
+```{r}
+weather_df %>%
+  mutate(name = fct_reorder(name, tmax)) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+
+# tmax says look at the factors that i ahve and look at the smallest tmax, then the next largest, etc. now in order according to T max 
+```
+
+
+```{r}
+weather_df %>%
+  lm(tmax ~ name, data = .)
+
+weather_df %>%
+  mutate(name = forcats::fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
+  lm(tmax ~ name, data = .)
+
+```
+
+```{r}
+
+data("nyc_airbnb")
+
+nyc_airbnb %>%
+  filter(neighbourhood_group == "Manhattan") %>% 
+  mutate(
+    neighbourhood = fct_reorder(neighbourhood, price, na.rm = TRUE)) %>% 
+  ggplot(aes(x = neighbourhood, y = price)) +
+  geom_boxplot() +
+  coord_flip() + 
+  ylim(0, 1000)
+
+# want neighborhoods in increasing price order 
+# "na.rm = TRUE" means remove missing values
+#fct_reorder puts it in an order 
+```
+
+```{r}
+
+data("rest_inspec")
+
+rest_inspec %>% 
+  group_by(boro, grade) %>% 
+  summarize(n = n()) %>% 
+  spread(key = grade, value = n)
+
+```
+
